@@ -44,6 +44,15 @@ app.get('/', (req, res) => {
     res.render('home.ejs');
 })
 
+app.get('/login', (req, res) => {
+    res.render('login.ejs');
+})
+
+app.get('/register', (req, res) => {
+    res.render('register.ejs');
+})
+
+
 app.post('/login', async(req,res) => {
     const{ regdno, password} = req.body;
     const user = await User.find({
