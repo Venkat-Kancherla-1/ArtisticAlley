@@ -18,15 +18,15 @@
                         <img src="/Images/logo.png" alt="Logo" width="100">
                     </div>
                     <h2 class="text-center text-3xl font-bold mb-4">Login</h2>
-                    <form class="space-y-6">
+                    <form id="signup-form" action="/login" method="POST">
                         <div class="space-y-2">
-                            <label for="username" class="block text-sm font-medium">Username:</label>
-                            <input type="text" id="username" placeholder="Enter your username" required
+                            <label for="regdno" class="block text-sm font-medium">Registration number or mail:</label>
+                            <input type="text" id="regdno" name="regdno" placeholder="Enter your registration number or mail" required
                                 class="input">
                         </div>
                         <div class="space-y-2">
                             <label for="password" class="block text-sm font-medium">Password:</label>
-                            <input type="password" id="password" placeholder="Enter your password" required
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required
                                 class="input">
                         </div>
                         <div class="flex justify-center">
