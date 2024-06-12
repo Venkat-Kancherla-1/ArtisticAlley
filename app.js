@@ -42,7 +42,16 @@ const userSchema = new mongoose.Schema({
     verificationToken: String,
 });
 
+const postSchema = new mongoose.Schema({
+    regdno:String,
+    title:String,
+    category:String,
+    date:Date,
+    image:String
+})
+
 const User = mongoose.model('User', userSchema);
+const Post = mongoose.model('Post', postSchema);
 
 app.get('/', (req, res) => {
     res.render('home.ejs');
@@ -60,6 +69,10 @@ app.get('/signup', (req, res) => {
     res.render('register.ejs');
 });
 
+app.get('/submission', (req, res) => {
+    res.render('submission.ejs');
+});
+
 app.post('/login', async (req, res) => {
     const { regdno, password } = req.body;
     const user = await User.findOne({
@@ -70,7 +83,7 @@ app.post('/login', async (req, res) => {
     });
     if (user) {
         if (password === user.password) {
-            const token = jwt.sign({ username: user.name }, 'artistic'); // Use 'name' or 'username' as needed
+            const token = jwt.sign({ username: user.name, regdno: user.regdno }, 'artistic');
             res.render('home.ejs');
         } else {
             res.render('login.ejs');
@@ -113,13 +126,13 @@ app.post('/signup', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'artisticalleyvit@gmail.com',
-                pass: 'ArtisticAlley@vit1',
+                user: process.env.gmail,
+                pass: process.env.password,
             },
         });
 
         const mailOptions = {
-            from: 'artisticalleyvit@gmail.com',
+            from: process.env.gmail,
             to: mail,
             subject: 'Verify Your Account',
             text: `Please verify your account by clicking the link: http://localhost:3000/verify/${verificationToken}`
@@ -148,6 +161,42 @@ app.get('/verify/:token', async (req, res) => {
         res.send('Your account has been verified. You can now log in.');
     } else {
         res.send('Invalid or expired token.');
+    }
+});
+
+app.post('/upload', upload.single('image'), async (req, res) => {
+    try {
+        let { regdno, Title, Category } = req.body;
+
+        const file = req.file; // Assuming `req.file` contains the uploaded file
+
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        const dataUri = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+
+        const result = await cloudinary.uploader.upload(dataUri);
+
+        const uploadedImageUrl = result.secure_url;
+
+        let currentDate = new Date();
+        console.log(currentDate);
+        
+        const post = new Post({
+            regdno: regdno,
+            title: Title,
+            category: Category,
+            date: currentDate,
+            image: uploadedImageUrl,
+        });
+
+        await post.save();
+
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while processing your request.');
     }
 });
 
